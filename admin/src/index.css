@@ -3,7 +3,7 @@
 :root {
   --sidebar: 222 47% 11%;
   --sidebar-foreground: 210 40% 98%;
-  --primary: 222 58% 41%;
+  --primary: 220 68% 55%; /* Zoberry Royal Blue HSL */
   --primary-foreground: 210 40% 98%;
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
@@ -34,7 +34,7 @@ body {
 }
 
 .sidebar-link.active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
 }
 
@@ -43,6 +43,7 @@ body {
   border-radius: 0.75rem;
   border: 1px solid #e2e8f0;
   padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary {
@@ -55,14 +56,14 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   color: white;
-  background: #1C3FB7;
+  background: #4274D9; /* Zoberry Royal Blue */
   transition: background 0.2s;
   border: none;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background: #15308a;
+  background: #2B55B3; /* Darker Royal Blue */
 }
 
 .btn-primary:disabled {

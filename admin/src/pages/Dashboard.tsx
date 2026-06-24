@@ -40,26 +40,29 @@ export default function Dashboard() {
   }, []);
 
   const cards = [
-    { label: "Total Products", value: stats.totalProducts, icon: Package, color: "bg-blue-500" },
-    { label: "Total Orders", value: stats.totalOrders, icon: ShoppingCart, color: "bg-green-500" },
-    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-purple-500" },
-    { label: "Revenue", value: `₹${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "bg-amber-500" },
-    { label: "Pending Orders", value: stats.pendingOrders, icon: TrendingUp, color: "bg-orange-500" },
-    { label: "Low Stock Items", value: stats.lowStock, icon: TrendingDown, color: "bg-red-500" },
+    { label: "Total Products", value: stats.totalProducts, icon: Package, color: "bg-[#4274D9]" },
+    { label: "Total Orders", value: stats.totalOrders, icon: ShoppingCart, color: "bg-[#293681]" },
+    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-[#95CCDD]" },
+    { label: "Revenue", value: `₹${stats.revenue.toLocaleString()}`, icon: DollarSign, color: "bg-[#22AD5C]" },
+    { label: "Pending Orders", value: stats.pendingOrders, icon: TrendingUp, color: "bg-[#F59E0B]" },
+    { label: "Low Stock Items", value: stats.lowStock, icon: TrendingDown, color: "bg-[#F23030]" },
   ];
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="card flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center`}>
+          <div 
+            key={label} 
+            className="card flex items-center gap-4 hover:shadow-lg hover:border-[#4274D9]/30 transition-all duration-300 transform hover:-translate-y-0.5 cursor-default"
+          >
+            <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center shadow-sm`}>
               <Icon className="text-white" size={22} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{label}</p>
-              <p className="text-2xl font-bold text-gray-800">{value}</p>
+              <p className="text-xs font-semibold tracking-wider text-gray-400 uppercase">{label}</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">{value}</p>
             </div>
           </div>
         ))}

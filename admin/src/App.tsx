@@ -13,6 +13,7 @@ import Testimonials from "./pages/Testimonials";
 import Blogs from "./pages/Blogs";
 import BlogForm from "./pages/BlogForm";
 import Contact from "./pages/Contact";
+import HeroSlides from "./pages/HeroSlides";
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="orders" element={<Orders />} />
             <Route path="users" element={<Users />} />
             <Route path="testimonials" element={<Testimonials />} />
+            <Route path="hero-slides" element={<HeroSlides />} />
             <Route path="blogs" element={<Blogs />} />
             <Route path="blogs/new" element={<BlogForm />} />
             <Route path="blogs/:id" element={<BlogForm />} />

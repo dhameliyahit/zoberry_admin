@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Package, Tags, ShoppingCart, Users,
-  MessageSquare, FileText, Star, LogOut, ChevronDown,
+  MessageSquare, FileText, Star, LogOut, ChevronDown, Sliders,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -13,6 +13,7 @@ const navItems = [
   { to: "/orders", icon: ShoppingCart, label: "Orders" },
   { to: "/users", icon: Users, label: "Users" },
   { to: "/testimonials", icon: Star, label: "Testimonials" },
+  { to: "/hero-slides", icon: Sliders, label: "Hero Slides" },
   { to: "/blogs", icon: FileText, label: "Blogs" },
   { to: "/contact", icon: MessageSquare, label: "Enquiries" },
 ];
@@ -29,7 +30,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      <aside className="w-64 bg-[#0F172A] text-white flex flex-col shrink-0">
+      <aside className="w-64 bg-[#293681] text-white flex flex-col shrink-0">
         <div className="p-6 border-b border-white/10">
           <h1 className="text-xl font-bold tracking-tight">Zoberry</h1>
           <p className="text-xs text-gray-400 mt-0.5">Admin Panel</p>
