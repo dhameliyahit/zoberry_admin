@@ -1,136 +1,284 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
-import api from "../services/api";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  ArrowBack as ArrowBackIcon,
+} from "@mui/icons-material";
 
 interface Product {
-  _id: string;
+  id: string;
   name: string;
-  category?: { name: string } | string;
+  category: string;
+  categoryId: string;
   price: number;
-  discountedPrice?: number;
   stock: number;
-  isActive: boolean;
-  images: string[];
+  status: "active" | "inactive";
 }
 
-export default function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+const mockProducts: Product[] = [
+  { id: "1", name: "Smartphone X", category: "Electronics", categoryId: "1", price: 699, stock: 45, status: "active" },
+  { id: "2", name: "Laptop Pro", category: "Electronics", categoryId: "1", price: 1299, stock: 12, status: "active" },
+  { id: "3", name: "Wireless Headphones", category: "Electronics", categoryId: "1", price: 149, stock: 78, status: "active" },
+  { id: "4", name: "Cotton T-Shirt", category: "Clothing", categoryId: "2", price: 29, stock: 150, status: "active" },
+  { id: "5", name: "Denim Jeans", category: "Clothing", categoryId: "2", price: 79, stock: 0, status: "inactive" },
+  { id: "6", name: "Garden Chair", category: "Home & Garden", categoryId: "3", price: 89, stock: 23, status: "active" },
+  { id: "7", name: "Running Shoes", category: "Sports", categoryId: "4", price: 119, stock: 34, status: "active" },
+  { id: "8", name: "Fiction Novel", category: "Books", categoryId: "5", price: 14, stock: 200, status: "active" },
+];
 
-  const fetchProducts = async () => {
-    try {
-      const params = search ? { search } : {};
-      const res = await api.get("/products", { params });
-      setProducts(res.data.data || []);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
+const categoryNames: Record<string, string> = {
+  "1": "Electronics",
+  "2": "Clothing",
+  "3": "Home & Garden",
+  "4": "Sports",
+  "5": "Books",
+  "6": "Toys",
+};
+
+export default function Products() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get("category");
+
+  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [search, setSearch] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (categoryId) {
+      setProducts(mockProducts.filter((p) => p.categoryId === categoryId));
+    } else {
+      setProducts(mockProducts);
+    }
+  }, [categoryId]);
+
+  const filtered = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleDelete = () => {
+    if (deleteId) {
+      setProducts((prev) => prev.filter((p) => p.id !== deleteId));
+      setDeleteId(null);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [search]);
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
-    await api.delete(`/products/${id}`);
-    setProducts((prev) => prev.filter((p) => p._id !== id));
-  };
-
-  const getCategoryName = (cat: any) => {
-    if (!cat) return "—";
-    return typeof cat === "string" ? cat : cat.name;
-  };
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Products</h1>
-        <Link to="/products/new" className="btn-primary">
-          <Plus size={16} /> Add Product
-        </Link>
-      </div>
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
+        {categoryId && (
+          <IconButton
+            onClick={() => navigate("/categories")}
+            sx={{
+              color: "var(--text-secondary)",
+              "&:hover": { background: "var(--hover-bg)" },
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+        )}
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--text-primary)" }}>
+            {categoryId ? `${categoryNames[categoryId] || "Category"} Products` : "Products"}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "var(--text-secondary)", mt: 0.5 }}>
+            {categoryId ? "Products in this category" : "Manage your products"}
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{
+            background: "#000000",
+            color: "#ffffff",
+            textTransform: "none",
+            fontWeight: 600,
+            px: 3,
+            py: 1,
+            borderRadius: "8px",
+            boxShadow: "none",
+            "&:hover": { background: "#262626", boxShadow: "none" },
+          }}
+        >
+          Add Product
+        </Button>
+      </Box>
 
-      <div className="card mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-10"
-          />
-        </div>
-      </div>
+      {/* Search */}
+      <TextField
+        fullWidth
+        placeholder="Search products..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: "var(--text-secondary)", fontSize: 20 }} />
+              </InputAdornment>
+            ),
+          },
+        }}
+        sx={{
+          mb: 3,
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "8px",
+            background: "var(--card-bg)",
+            "& fieldset": { borderColor: "var(--border-color)" },
+            "&:hover fieldset": { borderColor: "#000000" },
+            "&.Mui-focused fieldset": { borderColor: "#000000" },
+          },
+        }}
+      />
 
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b">
-                <th className="table-header">Product</th>
-                <th className="table-header">Category</th>
-                <th className="table-header">Price</th>
-                <th className="table-header">Stock</th>
-                <th className="table-header">Status</th>
-                <th className="table-header text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr><td colSpan={6} className="text-center py-12 text-gray-500">Loading...</td></tr>
-              ) : products.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-12 text-gray-500">No products found</td></tr>
-              ) : products.map((p) => (
-                <tr key={p._id} className="hover:bg-gray-50">
-                  <td className="table-cell">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={p.images?.[0] || "https://placehold.co/40x40"}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover bg-gray-100"
-                      />
-                      <span className="font-medium text-gray-800 truncate max-w-[200px]">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className="table-cell">{getCategoryName(p.category)}</td>
-                  <td className="table-cell">
-                    {p.discountedPrice ? (
-                      <>
-                          <span className="font-medium">₹{p.discountedPrice}</span>
-                          <span className="text-gray-400 line-through ml-1 text-xs">₹{p.price}</span>
-                      </>
-                    ) : (
-                      <span className="font-medium">₹{p.price}</span>
-                    )}
-                  </td>
-                  <td className="table-cell">{p.stock ?? "—"}</td>
-                  <td className="table-cell">
-                    <span className={p.isActive ? "badge-success" : "badge-danger"}>
-                      {p.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="table-cell text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link to={`/products/${p._id}`} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                        <Edit size={15} className="text-blue-600" />
-                      </Link>
-                      <button onClick={() => handleDelete(p._id)} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                        <Trash2 size={15} className="text-red-500" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      {/* Table */}
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: "12px",
+          border: "1px solid var(--border-color)",
+          boxShadow: "none",
+          background: "var(--card-bg)",
+        }}
+      >
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                Product
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                Category
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                Price
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                Stock
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                Status
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: "0.75rem", textTransform: "uppercase" }} align="right">
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filtered.map((product) => (
+              <TableRow key={product.id} sx={{ "&:last-child td": { border: 0 } }}>
+                <TableCell sx={{ color: "var(--text-primary)", fontWeight: 500 }}>
+                  {product.name}
+                </TableCell>
+                <TableCell sx={{ color: "var(--text-secondary)" }}>
+                  {product.category}
+                </TableCell>
+                <TableCell sx={{ color: "var(--text-primary)" }}>
+                  ${product.price}
+                </TableCell>
+                <TableCell sx={{ color: "var(--text-primary)" }}>
+                  {product.stock}
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={product.status}
+                    size="small"
+                    sx={{
+                      fontSize: "0.7rem",
+                      height: "22px",
+                      fontWeight: 600,
+                      textTransform: "capitalize",
+                      background: product.status === "active" ? "#f0fdf4" : "#fef2f2",
+                      color: product.status === "active" ? "#16a34a" : "#dc2626",
+                      border: `1px solid ${product.status === "active" ? "#bbf7d0" : "#fecaca"}`,
+                    }}
+                  />
+                </TableCell>
+                <TableCell align="right">
+                  <IconButton
+                    size="small"
+                    sx={{
+                      color: "var(--text-secondary)",
+                      "&:hover": { background: "var(--hover-bg)" },
+                    }}
+                  >
+                    <EditIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => setDeleteId(product.id)}
+                    sx={{
+                      color: "var(--text-secondary)",
+                      "&:hover": { color: "#ef4444", background: "rgba(239,68,68,0.08)" },
+                    }}
+                  >
+                    <DeleteIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+            {filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 6, color: "var(--text-secondary)" }}>
+                  No products found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Delete Dialog */}
+      <Dialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        slotProps={{
+          paper: {
+            sx: { borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--card-bg)" },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: "var(--text-primary)" }}>Delete Product</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: "var(--text-secondary)" }}>
+            Are you sure you want to delete this product?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteId(null)} sx={{ textTransform: "none", color: "var(--text-secondary)" }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            sx={{ textTransform: "none", background: "#ef4444", color: "#ffffff", "&:hover": { background: "#dc2626" } }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
