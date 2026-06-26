@@ -5,18 +5,22 @@ import {
   Typography,
   TextField,
   Button,
-  Card,
   CardMedia,
   IconButton,
   CircularProgress,
   Tabs,
   Tab,
+  Paper,
+  useTheme,
+  alpha,
+  Fade,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
   Link as LinkIcon,
   Delete as DeleteIcon,
   Image as ImageIcon,
+  CloudUpload as UploadIcon,
 } from "@mui/icons-material";
 import api from "../services/api";
 
@@ -33,6 +37,8 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 export default function CategoryForm() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const isEdit = Boolean(id);
 
   const [name, setName] = useState("");
@@ -122,132 +128,287 @@ export default function CategoryForm() {
   if (fetching) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-        <CircularProgress sx={{ color: "#1976d2" }} />
+        <CircularProgress sx={{ color: theme.palette.text.primary }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
+    <Box sx={{ maxWidth: 640 }}>
+      {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
         <IconButton
           onClick={() => navigate("/categories")}
-          sx={{ color: "var(--text-secondary)", "&:hover": { background: "var(--hover-bg)" } }}
+          sx={{
+            color: theme.palette.text.secondary,
+            "&:hover": { background: alpha(theme.palette.text.primary, 0.05) },
+          }}
         >
-          <ArrowBackIcon />
+          <ArrowBackIcon fontSize="small" />
         </IconButton>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: "var(--text-primary)" }}>
-            {isEdit ? "Edit Category" : "Add Category"}
+          <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.text.primary, letterSpacing: "-0.02em" }}>
+            {isEdit ? "Edit Category" : "New Category"}
           </Typography>
-          <Typography variant="body2" sx={{ color: "var(--text-secondary)", mt: 0.5 }}>
-            {isEdit ? "Update category details" : "Create a new category"}
+          <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mt: 0.25 }}>
+            {isEdit ? "Update category information" : "Add a new category to your store"}
           </Typography>
         </Box>
       </Box>
 
-      <Card
+      {/* Form Card */}
+      <Paper
+        variant="outlined"
         sx={{
-          p: 3,
-          borderRadius: "12px",
-          border: "1px solid var(--border-color)",
-          background: "var(--card-bg)",
-          boxShadow: "none",
+          p: 0,
+          borderRadius: "10px",
+          borderColor: theme.palette.divider,
+          bgcolor: theme.palette.background.paper,
+          overflow: "hidden",
         }}
       >
         <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Category Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            sx={{
-              mb: 3,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                color: "var(--text-primary)",
-                "& fieldset": { borderColor: "var(--border-color)" },
-                "&:hover fieldset": { borderColor: "#1976d2" },
-                "&.Mui-focused fieldset": { borderColor: "#1976d2" },
-              },
-              "& .MuiInputLabel-root": { color: "var(--text-secondary)" },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#1976d2" },
-            }}
-          />
+          {/* Name Field */}
+          <Box sx={{ p: 3, pb: 2 }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, color: theme.palette.text.secondary, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.7rem" }}>
+              Category Name
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder="e.g. Electronics, Clothing, Home..."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+              sx={{
+                mt: 1,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  fontSize: "0.9rem",
+                  backgroundColor: isDark ? alpha("#ffffff", 0.03) : alpha("#000000", 0.02),
+                  "& fieldset": { borderColor: theme.palette.divider },
+                  "&:hover fieldset": { borderColor: alpha(theme.palette.text.primary, 0.3) },
+                  "&.Mui-focused fieldset": { borderColor: theme.palette.text.primary, borderWidth: "1px" },
+                },
+              }}
+            />
+          </Box>
 
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: "var(--text-primary)" }}>
+          {/* Divider */}
+          <Box sx={{ mx: 3, borderBottom: `1px solid ${theme.palette.divider}` }} />
+
+          {/* Image Section */}
+          <Box sx={{ p: 3 }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, color: theme.palette.text.secondary, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.7rem" }}>
               Category Image
             </Typography>
-            <Box sx={{ border: "1px solid var(--border-color)", borderRadius: "8px", overflow: "hidden", background: "var(--card-bg)" }}>
-              <Tabs
-                value={tabValue}
-                onChange={(_, v) => { setTabValue(v); if (imagePreview) handleRemoveImage(); }}
-                sx={{
-                  minHeight: 42,
-                  borderBottom: "1px solid var(--border-color)",
-                  "& .MuiTab-root": {
-                    minHeight: 42,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    fontSize: "0.85rem",
-                    color: "var(--text-secondary)",
-                    "&.Mui-selected": { color: "#1976d2" },
-                  },
-                  "& .MuiTabs-indicator": { background: "#1976d2", height: 2 },
-                }}
-              >
-                <Tab icon={<ImageIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="Upload" />
-                <Tab icon={<LinkIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="URL" />
-              </Tabs>
 
-              <TabPanel value={tabValue} index={0}>
-                <Box sx={{ px: 2, pb: 2 }}>
+            <Tabs
+              value={tabValue}
+              onChange={(_, v) => { setTabValue(v); if (imagePreview) handleRemoveImage(); }}
+              sx={{
+                mt: 1.5,
+                minHeight: 36,
+                "& .MuiTab-root": {
+                  minHeight: 36,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                  color: theme.palette.text.secondary,
+                  "&.Mui-selected": { color: theme.palette.text.primary },
+                },
+                "& .MuiTabs-indicator": { background: theme.palette.text.primary, height: 2 },
+              }}
+            >
+              <Tab icon={<UploadIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Upload" />
+              <Tab icon={<LinkIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="URL" />
+            </Tabs>
+
+            {/* Upload Tab */}
+            <TabPanel value={tabValue} index={0}>
+              <Fade in timeout={200}>
+                <Box>
                   {imagePreview && tabValue === 0 ? (
                     <Box sx={{ position: "relative", display: "inline-block" }}>
-                      <CardMedia component="img" height="200" image={imagePreview} alt="Preview" sx={{ borderRadius: "8px", objectFit: "cover", width: 200 }} />
-                      <IconButton size="small" onClick={handleRemoveImage} sx={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.5)", color: "#fff", "&:hover": { background: "rgba(0,0,0,0.7)" } }}>
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={imagePreview}
+                        alt="Preview"
+                        sx={{
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                          width: 200,
+                          border: `1px solid ${theme.palette.divider}`,
+                        }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={handleRemoveImage}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          background: alpha(theme.palette.error.main, 0.9),
+                          color: "#ffffff",
+                          "&:hover": { background: theme.palette.error.main },
+                          width: 28,
+                          height: 28,
+                        }}
+                      >
                         <DeleteIcon sx={{ fontSize: 16 }} />
                       </IconButton>
                     </Box>
                   ) : (
-                    <Box component="label" htmlFor="image-upload" sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 160, border: "2px dashed var(--border-color)", borderRadius: "8px", cursor: "pointer", background: "var(--hover-bg)", "&:hover": { borderColor: "#1976d2" } }}>
-                      <ImageIcon sx={{ fontSize: 40, color: "var(--text-muted)", mb: 1 }} />
-                      <Typography variant="body2" sx={{ color: "var(--text-secondary)", fontWeight: 500 }}>Click to upload image</Typography>
-                      <Typography variant="caption" sx={{ color: "var(--text-muted)", mt: 0.5 }}>PNG, JPG, WEBP up to 5MB</Typography>
+                    <Box
+                      component="label"
+                      htmlFor="image-upload"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: 160,
+                        border: `2px dashed ${theme.palette.divider}`,
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        background: isDark ? alpha("#ffffff", 0.02) : alpha("#000000", 0.01),
+                        transition: "all 0.15s ease",
+                        "&:hover": {
+                          borderColor: theme.palette.text.secondary,
+                          background: isDark ? alpha("#ffffff", 0.04) : alpha("#000000", 0.03),
+                        },
+                      }}
+                    >
+                      <UploadIcon sx={{ fontSize: 32, color: theme.palette.text.disabled, mb: 1 }} />
+                      <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontWeight: 500, fontSize: "0.85rem" }}>
+                        Click to upload
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: theme.palette.text.disabled, mt: 0.5 }}>
+                        PNG, JPG, WEBP up to 5MB
+                      </Typography>
                     </Box>
                   )}
                   <input id="image-upload" type="file" accept="image/*" hidden onChange={handleFileChange} />
                 </Box>
-              </TabPanel>
+              </Fade>
+            </TabPanel>
 
-              <TabPanel value={tabValue} index={1}>
-                <Box sx={{ px: 2, pb: 2 }}>
-                  <TextField fullWidth placeholder="https://example.com/image.jpg" value={imageUrl} onChange={handleUrlChange} size="small" sx={{ mb: 2, "& .MuiOutlinedInput-root": { borderRadius: "8px", fontSize: "0.875rem", color: "var(--text-primary)", "& fieldset": { borderColor: "var(--border-color)" }, "&:hover fieldset": { borderColor: "#1976d2" }, "&.Mui-focused fieldset": { borderColor: "#1976d2" } } }} />
-                  {imagePreview && tabValue === 1 ? (
+            {/* URL Tab */}
+            <TabPanel value={tabValue} index={1}>
+              <Fade in timeout={200}>
+                <Box>
+                  <TextField
+                    fullWidth
+                    placeholder="https://example.com/image.jpg"
+                    value={imageUrl}
+                    onChange={handleUrlChange}
+                    size="small"
+                    sx={{
+                      mb: 2,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        fontSize: "0.875rem",
+                        backgroundColor: isDark ? alpha("#ffffff", 0.03) : alpha("#000000", 0.02),
+                        "& fieldset": { borderColor: theme.palette.divider },
+                        "&:hover fieldset": { borderColor: alpha(theme.palette.text.primary, 0.3) },
+                        "&.Mui-focused fieldset": { borderColor: theme.palette.text.primary, borderWidth: "1px" },
+                      },
+                    }}
+                  />
+                  {imagePreview && tabValue === 1 && (
                     <Box sx={{ position: "relative", display: "inline-block" }}>
-                      <CardMedia component="img" height="200" image={imagePreview} alt="Preview" sx={{ borderRadius: "8px", objectFit: "cover", width: 200 }} />
-                      <IconButton size="small" onClick={handleRemoveImage} sx={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.5)", color: "#fff", "&:hover": { background: "rgba(0,0,0,0.7)" } }}>
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={imagePreview}
+                        alt="Preview"
+                        sx={{
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                          width: 200,
+                          border: `1px solid ${theme.palette.divider}`,
+                        }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={handleRemoveImage}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          background: alpha(theme.palette.error.main, 0.9),
+                          color: "#ffffff",
+                          "&:hover": { background: theme.palette.error.main },
+                          width: 28,
+                          height: 28,
+                        }}
+                      >
                         <DeleteIcon sx={{ fontSize: 16 }} />
                       </IconButton>
                     </Box>
-                  ) : null}
+                  )}
                 </Box>
-              </TabPanel>
-            </Box>
+              </Fade>
+            </TabPanel>
           </Box>
 
-          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-            <Button onClick={() => navigate("/categories")} disabled={loading} sx={{ textTransform: "none", fontWeight: 600, color: "var(--text-secondary)", border: "1px solid var(--border-color)", borderRadius: "8px", px: 3, "&:hover": { background: "var(--hover-bg)" } }}>
+          {/* Divider */}
+          <Box sx={{ mx: 3, borderBottom: `1px solid ${theme.palette.divider}` }} />
+
+          {/* Actions */}
+          <Box sx={{ p: 3, display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
+            <Button
+              onClick={() => navigate("/categories")}
+              disabled={loading}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                color: theme.palette.text.secondary,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "8px",
+                px: 3,
+                py: 1,
+                "&:hover": {
+                  background: isDark ? alpha("#ffffff", 0.05) : alpha("#000000", 0.04),
+                  borderColor: theme.palette.text.secondary,
+                },
+              }}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="contained" disabled={loading} sx={{ textTransform: "none", fontWeight: 600, background: "#1976d2", color: "#ffffff", borderRadius: "8px", px: 3, boxShadow: "none", "&:hover": { background: "#1565c0", boxShadow: "none" } }}>
-              {loading ? "Saving..." : isEdit ? "Update Category" : "Create Category"}
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading || !name.trim()}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                background: theme.palette.text.primary,
+                color: theme.palette.background.paper,
+                borderRadius: "8px",
+                px: 3,
+                py: 1,
+                boxShadow: "none",
+                "&:hover": { background: theme.palette.text.primary, boxShadow: "none", opacity: 0.9 },
+                "&.Mui-disabled": {
+                  background: theme.palette.action.disabledBackground,
+                  color: theme.palette.action.disabled,
+                },
+              }}
+            >
+              {loading ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={16} sx={{ color: "inherit" }} />
+                  Saving...
+                </Box>
+              ) : isEdit ? "Update Category" : "Create Category"}
             </Button>
           </Box>
         </Box>
-      </Card>
+      </Paper>
     </Box>
   );
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { Box, Toolbar } from "@mui/material";
+import { Box, Toolbar, ThemeProvider, CssBaseline } from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
+import getTheme from "../theme";
 
 const DRAWER_WIDTH = 260;
 const COLLAPSED_WIDTH = 72;
@@ -23,53 +24,52 @@ export default function AdminLayout() {
   const handleToggleCollapse = () => setCollapsed(!collapsed);
   const handleToggleDarkMode = () => setDarkMode(!darkMode);
 
-  const sidebarWidth = collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH;
+  const theme = getTheme(darkMode);
+  const sidebarWidth = `${collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH}px`;
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", background: darkMode ? "#0a0a0a" : "#f9fafb" }}>
-      {/* Sidebar */}
-      <Sidebar
-        drawerOpen={mobileOpen}
-        collapsed={collapsed}
-        onDrawerClose={handleDrawerToggle}
-        onToggleCollapse={handleToggleCollapse}
-        darkMode={darkMode}
-      />
-
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { md: `calc(100% - ${sidebarWidth}px)` },
-          display: "flex",
-          flexDirection: "column",
-          transition: "all 0.3s ease",
-        }}
-      >
-        {/* Top Bar */}
-        <TopBar
-          onMenuClick={handleDrawerToggle}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: "flex", minHeight: "100vh", background: "var(--bg-secondary)" }}>
+        <Sidebar
+          drawerOpen={mobileOpen}
+          collapsed={collapsed}
+          onDrawerClose={handleDrawerToggle}
+          onToggleCollapse={handleToggleCollapse}
           darkMode={darkMode}
-          onToggleDarkMode={handleToggleDarkMode}
-          sidebarWidth={sidebarWidth}
         />
 
-        {/* Spacer for fixed AppBar */}
-        <Toolbar sx={{ minHeight: "64px !important" }} />
-
-        {/* Page Content */}
         <Box
+          component="main"
           sx={{
-            flex: 1,
-            p: { xs: 2, sm: 3 },
-            overflowY: "auto",
-            overflowX: "hidden",
+            flexGrow: 1,
+            width: { md: `calc(100% - ${sidebarWidth}px)` },
+            display: "flex",
+            flexDirection: "column",
+            transition: "all 0.3s ease",
           }}
         >
-          <Outlet />
+          <TopBar
+            onMenuClick={handleDrawerToggle}
+            darkMode={darkMode}
+            onToggleDarkMode={handleToggleDarkMode}
+            sidebarWidth={sidebarWidth}
+          />
+
+          <Toolbar sx={{ minHeight: "64px !important" }} />
+
+          <Box
+            sx={{
+              flex: 1,
+              p: { xs: 2, sm: 3 },
+              overflowY: "auto",
+              overflowX: "hidden",
+            }}
+          >
+            <Outlet />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 }

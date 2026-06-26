@@ -2,31 +2,30 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Drawer,
-  Toolbar,
-  IconButton,
-  Avatar,
   Tooltip,
-  Typography,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  IconButton,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   Category as CategoryIcon,
+  Inventory as InventoryIcon,
   People as PeopleIcon,
-  ChevronLeft,
   ChevronRight,
 } from "@mui/icons-material";
 
-const DRAWER_WIDTH = 260;
-const COLLAPSED_WIDTH = 72;
+// Fluid dynamic widths based on your 10% design parameters
+export const SIDEBAR_EXPANDED_WIDTH = "max(10vw, 220px)"; 
+export const SIDEBAR_COLLAPSED_WIDTH = "72px";
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
   { text: "Categories", icon: <CategoryIcon />, path: "/categories" },
+  { text: "Products", icon: <InventoryIcon />, path: "/products" },
   { text: "Users", icon: <PeopleIcon />, path: "/users" },
 ];
 
@@ -48,6 +47,16 @@ export default function Sidebar({
   const navigate = useNavigate();
   const location = useLocation();
 
+  const bgColor = darkMode ? "#000000" : "#ffffff";
+  const textColor = darkMode ? "#ffffff" : "#000000";
+  const subTextColor = darkMode ? "#aaaaaa" : "#666666";
+  const activeBgColor = darkMode ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.06)";
+  const hoverBgColor = darkMode ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)";
+  const borderColor = darkMode ? "#222222" : "#e0e0e0";
+  const accentColor = darkMode ? "#ffffff" : "#000000";
+
+  const currentWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH;
+
   const handleNavigate = (path: string) => {
     navigate(path);
     onDrawerClose();
@@ -59,154 +68,112 @@ export default function Sidebar({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: darkMode ? "#0a0a0a" : "#000000",
-        transition: "all 0.3s ease",
+        background: bgColor,
+        backdropFilter: "blur(10px)",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        pt: 1,
       }}
     >
-      {/* Logo */}
-      <Toolbar
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between",
-          px: collapsed ? 1 : 2,
-          py: 1.5,
-          minHeight: "64px !important",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, overflow: "hidden" }}>
-          <Avatar
-            sx={{
-              bgcolor: "#ffffff",
-              color: "#000000",
-              width: 36,
-              height: 36,
-              fontSize: "1rem",
-              fontWeight: 700,
-              flexShrink: 0,
-            }}
-          >
-            Z
-          </Avatar>
-          {!collapsed && (
-            <Box sx={{ overflow: "hidden", whiteSpace: "nowrap" }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  color: "#ffffff",
-                  fontWeight: 700,
-                  fontSize: "0.95rem",
-                  lineHeight: 1.2,
-                }}
-              >
-                Zoberry
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: "#a1a1aa", fontSize: "0.65rem" }}
-              >
-                Admin Panel
-              </Typography>
-            </Box>
-          )}
-        </Box>
-        {!collapsed && (
-          <Box
-            onClick={onToggleCollapse}
-            sx={{
-              cursor: "pointer",
-              color: "#a1a1aa",
-              display: { xs: "none", md: "flex" },
-              "&:hover": { color: "#ffffff" },
-              transition: "color 0.2s",
-            }}
-          >
-            <ChevronLeft fontSize="small" />
-          </Box>
-        )}
-      </Toolbar>
-
-      {/* Navigation */}
-      <Box sx={{ flex: 1, py: 2, px: collapsed ? 1 : 1.5 }}>
-        <List>
+      <Box sx={{ flex: 1 }}>
+        <List sx={{ p: 0 }}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
-            return (
-              <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
-                <ListItemButton
-                  onClick={() => handleNavigate(item.path)}
+
+            const buttonContent = (
+              <ListItemButton
+                onClick={() => handleNavigate(item.path)}
+                sx={{
+                  borderRadius: 0,
+                  minHeight: 48,
+                  justifyContent: collapsed ? "center" : "initial",
+                  px: collapsed ? 1.5 : 2.5,
+                  color: isActive ? textColor : subTextColor,
+                  background: isActive ? activeBgColor : "transparent",
+                  position: "relative",
+                  "&:hover": {
+                    background: isActive ? activeBgColor : hoverBgColor,
+                    color: textColor,
+                    "& .MuiListItemIcon-root": { color: textColor },
+                  },
+                  transition: "all 0.15s ease",
+                  "&::before": isActive && !collapsed ? {
+                    content: '""',
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: "4px",
+                    backgroundColor: accentColor,
+                  } : {},
+                }}
+              >
+                <ListItemIcon
                   sx={{
-                    borderRadius: "8px",
-                    minHeight: 44,
-                    justifyContent: collapsed ? "center" : "initial",
-                    px: collapsed ? 1 : 2,
-                    color: isActive ? "#ffffff" : "#a1a1aa",
-                    background: isActive ? "#ffffff" : "transparent",
-                    "&:hover": {
-                      background: isActive ? "#ffffff" : "rgba(255,255,255,0.05)",
-                    },
-                    transition: "all 0.2s ease",
+                    color: isActive ? textColor : "inherit",
+                    minWidth: collapsed ? 0 : 36,
+                    justifyContent: "center",
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      color: isActive ? "#000000" : "inherit",
-                      minWidth: collapsed ? 0 : 40,
-                      justifyContent: "center",
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  {!collapsed && (
-                    <ListItemText
-                      primary={item.text}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            fontSize: "0.875rem",
-                            fontWeight: isActive ? 600 : 400,
-                            color: isActive ? "#000000" : "inherit",
-                          },
+                  {item.icon}
+                </ListItemIcon>
+
+                {!collapsed && (
+                  <ListItemText
+                    primary={item.text}
+                    slotProps={{
+                      primary: {
+                        sx: {
+                          fontSize: "0.9rem",
+                          fontWeight: isActive ? 600 : 500,
+                          color: isActive ? textColor : "inherit",
+                          marginLeft: 0.5,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
                         },
-                      }}
-                    />
-                  )}
-                </ListItemButton>
+                      },
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            );
+
+            return (
+              <ListItem key={item.text} disablePadding>
+                {collapsed ? (
+                  <Tooltip title={item.text} placement="right" arrow>
+                    {buttonContent}
+                  </Tooltip>
+                ) : (
+                  buttonContent
+                )}
               </ListItem>
             );
           })}
         </List>
       </Box>
 
-      {/* Collapse/Expand toggle at bottom */}
-      <Box
-        sx={{
-          display: { xs: "none", md: "flex" },
-          justifyContent: collapsed ? "center" : "flex-end",
-          px: collapsed ? 1 : 2,
-          pb: 2,
-        }}
-      >
-        {collapsed && (
-          <Tooltip title="Expand sidebar" placement="right">
+      {collapsed && (
+        <Box sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center", pb: 3 }}>
+          <Tooltip title="Expand sidebar" placement="right" arrow>
             <IconButton
               onClick={onToggleCollapse}
               sx={{
-                color: "#a1a1aa",
-                "&:hover": { color: "#ffffff", background: "rgba(255,255,255,0.05)" },
+                color: subTextColor,
+                background: hoverBgColor,
+                "&:hover": { color: textColor, background: activeBgColor },
               }}
             >
               <ChevronRight fontSize="small" />
             </IconButton>
           </Tooltip>
-        )}
-      </Box>
+        </Box>
+      )}
     </Box>
   );
 
   return (
     <>
-      {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         open={drawerOpen}
@@ -216,7 +183,7 @@ export default function Sidebar({
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: DRAWER_WIDTH,
+            width: 260,
             border: "none",
           },
         }}
@@ -224,21 +191,21 @@ export default function Sidebar({
         {drawerContent}
       </Drawer>
 
-      {/* Desktop Drawer */}
       <Drawer
         variant="permanent"
         sx={{
           display: { xs: "none", md: "block" },
-          width: collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH,
+          width: currentWidth,
           flexShrink: 0,
-          transition: "width 0.3s ease",
+          transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH,
+            width: currentWidth,
             border: "none",
-            borderRight: darkMode ? "1px solid #262626" : "1px solid #1a1a1a",
-            transition: "width 0.3s ease",
+            borderRight: `1px solid ${borderColor}`,
+            transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             overflowX: "hidden",
+            background: "transparent",
           },
         }}
         open

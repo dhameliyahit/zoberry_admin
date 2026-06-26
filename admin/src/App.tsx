@@ -6,6 +6,8 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Categories from "./pages/Categories";
 import CategoryForm from "./pages/CategoryForm";
+import Products from "./pages/Products";
+import ProductForm from "./pages/ProductForm";
 import Users from "./pages/Users";
 
 export default function App() {
@@ -25,6 +27,9 @@ export default function App() {
             <Route path="categories" element={<Categories />} />
             <Route path="categories/add" element={<CategoryForm />} />
             <Route path="categories/edit/:id" element={<CategoryForm />} />
+            <Route path="products" element={<Products />} />
+            <Route path="products/add" element={<ProductForm />} />
+            <Route path="products/edit/:id" element={<ProductForm />} />
             <Route path="users" element={<Users />} />
           </Route>
         </Routes>

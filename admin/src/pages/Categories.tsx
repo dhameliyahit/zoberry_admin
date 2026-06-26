@@ -15,6 +15,8 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  useTheme,
+  alpha,
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
 import api from "../services/api";
@@ -27,6 +29,8 @@ interface Category {
 
 export default function Categories() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -65,7 +69,7 @@ export default function Categories() {
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-        <CircularProgress sx={{ color: "#1976d2" }} />
+        <CircularProgress sx={{ color: theme.palette.text.primary }} />
       </Box>
     );
   }
@@ -80,12 +84,12 @@ export default function Categories() {
           sx={{
             textTransform: "none",
             fontWeight: 600,
-            background: "#1976d2",
-            color: "#ffffff",
+            background: theme.palette.text.primary,
+            color: theme.palette.background.paper,
             borderRadius: "8px",
             px: 3,
             boxShadow: "none",
-            "&:hover": { background: "#1565c0", boxShadow: "none" },
+            "&:hover": { background: theme.palette.text.primary, boxShadow: "none", opacity: 0.9 },
           }}
         >
           Add Category
@@ -98,10 +102,14 @@ export default function Categories() {
             <Card
               sx={{
                 borderRadius: "8px",
-                border: "1px solid var(--border-color)",
-                background: "var(--card-bg)",
+                border: `1px solid ${theme.palette.divider}`,
+                background: theme.palette.background.paper,
                 boxShadow: "none",
                 overflow: "hidden",
+                transition: "border-color 0.15s ease",
+                "&:hover": {
+                  borderColor: theme.palette.text.secondary,
+                },
               }}
             >
               <CardMedia
@@ -117,7 +125,7 @@ export default function Categories() {
                   align="center"
                   sx={{
                     fontWeight: 600,
-                    color: "var(--text-primary)",
+                    color: theme.palette.text.primary,
                     fontSize: "1.1rem",
                   }}
                 >
@@ -141,14 +149,14 @@ export default function Categories() {
                     textTransform: "none",
                     fontSize: "0.8rem",
                     fontWeight: 600,
-                    color: "#1976d2",
+                    color: theme.palette.text.primary,
                     background: "transparent",
                     border: "none",
                     p: 0,
                     minWidth: "auto",
                     "&:hover": {
                       background: "transparent",
-                      color: "#1565c0",
+                      opacity: 0.7,
                     },
                   }}
                 >
@@ -158,9 +166,9 @@ export default function Categories() {
                   size="small"
                   onClick={() => setDeleteId(category._id)}
                   sx={{
-                    color: "#d32f2f",
+                    color: theme.palette.error.main,
                     p: 0,
-                    "&:hover": { background: "transparent", color: "#b71c1c" },
+                    "&:hover": { background: "transparent", opacity: 0.7 },
                   }}
                 >
                   <DeleteIcon sx={{ fontSize: 18 }} />
@@ -177,18 +185,18 @@ export default function Categories() {
         slotProps={{
           paper: {
             sx: {
-              borderRadius: "12px",
-              border: "1px solid var(--border-color)",
-              background: "var(--card-bg)",
+              borderRadius: "10px",
+              border: `1px solid ${theme.palette.divider}`,
+              background: theme.palette.background.paper,
             },
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 600, color: "var(--text-primary)" }}>
+        <DialogTitle sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
           Delete Category
         </DialogTitle>
         <DialogContent>
-          <Typography sx={{ color: "var(--text-secondary)" }}>
+          <Typography sx={{ color: theme.palette.text.secondary }}>
             Are you sure you want to delete this category? This action cannot be undone.
           </Typography>
         </DialogContent>
@@ -196,7 +204,7 @@ export default function Categories() {
           <Button
             onClick={() => setDeleteId(null)}
             disabled={deleting}
-            sx={{ textTransform: "none", color: "var(--text-secondary)" }}
+            sx={{ textTransform: "none", color: theme.palette.text.secondary }}
           >
             Cancel
           </Button>
@@ -205,9 +213,9 @@ export default function Categories() {
             disabled={deleting}
             sx={{
               textTransform: "none",
-              background: "#d32f2f",
+              background: theme.palette.error.main,
               color: "#ffffff",
-              "&:hover": { background: "#c62828" },
+              "&:hover": { background: theme.palette.error.dark },
             }}
           >
             {deleting ? "Deleting..." : "Delete"}

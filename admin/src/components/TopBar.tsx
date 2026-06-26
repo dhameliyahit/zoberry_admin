@@ -18,7 +18,7 @@ interface TopBarProps {
   onMenuClick: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
-  sidebarWidth: number;
+  sidebarWidth: string; // Enforced string type for fluid css math compatibility
 }
 
 export default function TopBar({
@@ -27,40 +27,42 @@ export default function TopBar({
   onToggleDarkMode,
   sidebarWidth,
 }: TopBarProps) {
+  const bgColor = darkMode ? "rgba(18, 18, 18, 0.85)" : "rgba(255, 255, 255, 0.85)";
+  const textColor = darkMode ? "#e2e8f0" : "#1e293b"; 
+  const subTextColor = darkMode ? "#94a3b8" : "#64748b";
+  const hoverBgColor = darkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.03)";
+  const borderColor = darkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.06)";
+
   return (
     <AppBar
       position="fixed"
       elevation={0}
       sx={{
-        width: { md: `calc(100% - ${sidebarWidth}px)` },
-        ml: { md: `${sidebarWidth}px` },
-        background: darkMode ? "#0a0a0a" : "#ffffff",
-        borderBottom: darkMode ? "1px solid #262626" : "1px solid #e5e5e5",
-        transition: "all 0.3s ease",
+        // Uses standard css calc function to compensate for fluid 10% sidebar sizing
+        width: { md: `calc(100% - ${sidebarWidth})` },
+        ml: { md: sidebarWidth },
+        background: bgColor,
+        backdropFilter: "blur(10px)",
+        borderBottom: `1px solid ${borderColor}`,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      <Toolbar sx={{ minHeight: "64px !important", px: { xs: 2, md: 3 } }}>
-        {/* Mobile Menu Button */}
+      <Toolbar sx={{ minHeight: "72px !important", px: { xs: 2, md: 3 } }}>
         <IconButton
           edge="start"
           onClick={onMenuClick}
-          sx={{
-            mr: 2,
-            display: { md: "none" },
-            color: darkMode ? "#fafafa" : "#111111",
-          }}
+          sx={{ mr: 2, display: { md: "none" }, color: textColor }}
         >
           <MenuIcon />
         </IconButton>
 
-        {/* Title */}
         <Typography
           variant="h6"
           noWrap
           sx={{
             fontWeight: 700,
-            fontSize: "1.1rem",
-            color: darkMode ? "#fafafa" : "#111111",
+            fontSize: "1.05rem",
+            color: textColor,
             letterSpacing: "-0.01em",
           }}
         >
@@ -69,55 +71,32 @@ export default function TopBar({
 
         <Box sx={{ flex: 1 }} />
 
-        {/* Right Actions */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          {/* Notifications */}
-          <Tooltip title="Notifications">
-            <IconButton
-              sx={{
-                color: darkMode ? "#a1a1aa" : "#6b7280",
-                "&:hover": { background: darkMode ? "#1a1a1a" : "#f3f4f6" },
-              }}
-            >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+          <Tooltip title="Notifications" arrow>
+            <IconButton sx={{ color: subTextColor, "&:hover": { color: textColor, background: hoverBgColor } }}>
               <NotificationsIcon sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
 
-          {/* Dark Mode Toggle */}
-          <Tooltip title={darkMode ? "Light mode" : "Dark mode"}>
-            <IconButton
-              onClick={onToggleDarkMode}
-              sx={{
-                color: darkMode ? "#a1a1aa" : "#6b7280",
-                "&:hover": { background: darkMode ? "#1a1a1a" : "#f3f4f6" },
-              }}
-            >
+          <Tooltip title={darkMode ? "Light mode" : "Dark mode"} arrow>
+            <IconButton onClick={onToggleDarkMode} sx={{ color: subTextColor, "&:hover": { color: textColor, background: hoverBgColor } }}>
               {darkMode ? <LightModeIcon sx={{ fontSize: 20 }} /> : <DarkModeIcon sx={{ fontSize: 20 }} />}
             </IconButton>
           </Tooltip>
 
-          {/* Avatar */}
-          <Tooltip title="Account">
-            <IconButton
-              sx={{
-                ml: 0.5,
-                "&:hover": { background: darkMode ? "#1a1a1a" : "#f3f4f6" },
-              }}
-            >
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: darkMode ? "#fafafa" : "#111111",
-                  color: darkMode ? "#0a0a0a" : "#ffffff",
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                }}
-              >
-                A
-              </Avatar>
-            </IconButton>
-          </Tooltip>
+          <Avatar
+            sx={{
+              width: 32,
+              height: 32,
+              ml: 1,
+              bgcolor: textColor,
+              color: darkMode ? "#121212" : "#ffffff",
+              fontSize: "0.85rem",
+              fontWeight: 700,
+            }}
+          >
+            A
+          </Avatar>
         </Box>
       </Toolbar>
     </AppBar>
