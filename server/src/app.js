@@ -11,7 +11,7 @@ const app = express();
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 // Only allow requests from localhost (admin panel frontend)
-app.use(cors({ origin: ["http://localhost:3001", "http://localhost:3000"] }));
+app.use(cors({ origin: ["http://localhost:3001", "http://localhost:3000","http://incompetent-crook.surge.sh","https://zoberryenterprise.vercel.app"] }));
 
 // Parse incoming JSON and urlencoded bodies (increased limit for base64 images)
 app.use(express.json({ limit: "10mb" }));
