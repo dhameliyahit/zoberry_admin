@@ -101,6 +101,9 @@ export default function Categories() {
           <Grid size={{ xs: 12, sm: 6, md: 3 }} key={category._id}>
             <Card
               sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
                 borderRadius: "8px",
                 border: `1px solid ${theme.palette.divider}`,
                 background: theme.palette.background.paper,
@@ -114,12 +117,15 @@ export default function Categories() {
             >
               <CardMedia
                 component="img"
-                height="200"
                 image={category.image}
                 alt={category.name}
-                sx={{ objectFit: "cover" }}
+                sx={{
+                  height: "200px",
+                  objectFit: "cover",
+                  width: "100%",
+                }}
               />
-              <CardContent sx={{ pb: 1, pt: 2, px: 2 }}>
+              <CardContent sx={{ flexGrow: 1, pb: 1, pt: 2, px: 2 }}>
                 <Typography
                   variant="h6"
                   align="center"

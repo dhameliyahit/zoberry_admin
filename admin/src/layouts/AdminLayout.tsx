@@ -30,7 +30,7 @@ export default function AdminLayout() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: "flex", minHeight: "100vh", background: "var(--bg-secondary)" }}>
+      <Box sx={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--bg-secondary)" }}>
         <Sidebar
           drawerOpen={mobileOpen}
           collapsed={collapsed}
