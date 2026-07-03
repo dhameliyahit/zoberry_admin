@@ -7,16 +7,11 @@ const seed = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to MongoDB");
 
-    const existing = await User.findOne({ email: "heet@admin.com" });
-    if (existing) {
-      console.log("Admin user already exists");
-      process.exit(0);
-    }
 
     const user = new User({
       name: "Admin",
-      email: "heet@admin.com",
-      password: "1212",
+      email: "dhruv@admin.com",
+      password: "Dhruv@123",
       role: "admin",
       phone: "",
       isActive: true,

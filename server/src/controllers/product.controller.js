@@ -209,26 +209,39 @@ const getAll = async (req, res, next) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const [products, total] = await Promise.all([
+    const [products, total, countsResult] = await Promise.all([
       Product.find(filter)
         .populate("category", "name slug")
         .sort(sortOption)
         .skip(skip)
         .limit(Number(limit)),
       Product.countDocuments(filter),
+      Product.aggregate([
+        {
+          $facet: {
+            active: [{ $match: { status: "active" } }, { $count: "count" }],
+            draft: [{ $match: { status: "draft" } }, { $count: "count" }],
+            archived: [{ $match: { status: "archived" } }, { $count: "count" }],
+            lowStock: [
+              {
+                $match: {
+                  status: "active",
+                  trackQuantity: true,
+                  stock: { $gte: 0, $lte: 10 },
+                },
+              },
+              { $count: "count" },
+            ],
+          },
+        },
+      ]),
     ]);
 
-    const statusCounts = await Promise.all([
-      Product.countDocuments({ status: "active" }),
-      Product.countDocuments({ status: "draft" }),
-      Product.countDocuments({ status: "archived" }),
-    ]);
-
-    const lowStockCount = await Product.countDocuments({
-      status: "active",
-      trackQuantity: true,
-      stock: { $gte: 0, $lte: 10 },
-    });
+    const counts = countsResult[0] || {};
+    const activeCount = counts.active?.[0]?.count || 0;
+    const draftCount = counts.draft?.[0]?.count || 0;
+    const archivedCount = counts.archived?.[0]?.count || 0;
+    const lowStockCount = counts.lowStock?.[0]?.count || 0;
 
     res.json({
       success: true,
@@ -241,9 +254,9 @@ const getAll = async (req, res, next) => {
       },
       meta: {
         statusCounts: {
-          active: statusCounts[0],
-          draft: statusCounts[1],
-          archived: statusCounts[2],
+          active: activeCount,
+          draft: draftCount,
+          archived: archivedCount,
         },
         lowStockCount,
       },

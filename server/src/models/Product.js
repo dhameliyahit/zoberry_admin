@@ -224,7 +224,6 @@ productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ isFeatured: 1 });
 productSchema.index({ price: 1 });
-productSchema.index({ sku: 1 });
 productSchema.index({ "variants.sku": 1 });
 
 module.exports = mongoose.model("Product", productSchema);
