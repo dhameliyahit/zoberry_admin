@@ -13,6 +13,7 @@ router.use("/testimonials", require("./testimonial.routes"));
 router.use("/blogs", require("./blog.routes"));
 router.use("/contact", require("./contact.routes"));
 router.use("/hero-slides", require("./heroSlide.routes"));
+router.use("/hero-videos", require("./heroVideo.routes"));
 router.use("/recently-viewed", require("./recentlyViewed.routes"));
 
 module.exports = router;

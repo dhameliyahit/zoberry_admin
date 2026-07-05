@@ -5,8 +5,10 @@ const { protect, adminOnly } = require("../middleware/auth");
 const orderController = require("../controllers/order.controller");
 
 router.get("/", protect, adminOnly, orderController.getAll);
+router.get("/metrics", protect, adminOnly, orderController.getMetrics);
 router.get("/my-orders", protect, orderController.getUserOrders);
 router.get("/:id", protect, adminOnly, orderController.getById);
+router.put("/:id/cancel", protect, orderController.cancelMyOrder);
 
 router.post(
   "/",

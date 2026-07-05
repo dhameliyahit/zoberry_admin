@@ -28,6 +28,7 @@ const register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        image: user.image || "",
         token: generateToken(user._id),
       },
     });
@@ -55,6 +56,7 @@ const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        image: user.image || "",
         token: generateToken(user._id),
       },
     });
@@ -116,7 +118,7 @@ const googleLogin = async (req, res, next) => {
     const payload = response.data;
 
     // payload contains: email, name, picture, sub (googleId)
-    const { email, name } = payload;
+    const { email, name, picture } = payload;
 
     let user = await User.findOne({ email });
 
@@ -128,7 +130,11 @@ const googleLogin = async (req, res, next) => {
         name,
         email,
         password: randomPassword,
+        image: picture || "",
       });
+    } else if (!user.image && picture) {
+      user.image = picture;
+      await user.save();
     }
 
     res.json({
@@ -138,6 +144,7 @@ const googleLogin = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        image: user.image || "",
         token: generateToken(user._id),
       },
     });

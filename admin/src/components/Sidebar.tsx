@@ -15,7 +15,9 @@ import {
   Category as CategoryIcon,
   Inventory as InventoryIcon,
   People as PeopleIcon,
+  Receipt as ReceiptIcon,
   ChevronRight,
+  OndemandVideo as VideoIcon,
 } from "@mui/icons-material";
 
 // Fluid dynamic widths based on your 10% design parameters
@@ -26,7 +28,9 @@ const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
   { text: "Categories", icon: <CategoryIcon />, path: "/categories" },
   { text: "Products", icon: <InventoryIcon />, path: "/products" },
+  { text: "Hero Videos", icon: <VideoIcon />, path: "/hero-videos" },
   { text: "Users", icon: <PeopleIcon />, path: "/users" },
+  { text: "Orders", icon: <ReceiptIcon />, path: "/orders" },
 ];
 
 interface SidebarProps {

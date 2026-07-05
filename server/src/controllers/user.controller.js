@@ -82,4 +82,57 @@ const delete_ = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, getById, update, delete: delete_ };
+const addAddress = async (req, res, next) => {
+  try {
+    const { phone, zip } = req.body;
+
+    // Validate phone number (Indian number formats: +91, 0, or just 10 digits starting with 6-9)
+    const phoneRegex = /^(?:\+91|0)?[6-9]\d{9}$/;
+    if (!phone || !phoneRegex.test(phone.trim())) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid phone number. Must be a valid 10-digit Indian mobile number."
+      });
+    }
+
+    // Validate zip (Indian 6-digit pin code)
+    const zipRegex = /^\d{6}$/;
+    if (!zip || !zipRegex.test(zip.trim())) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid zip/pincode. Must be a valid 6-digit Indian pincode."
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    user.addresses.push(req.body);
+    await user.save();
+
+    res.json({ success: true, data: user.addresses });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteAddress = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    user.addresses.pull({ _id: req.params.addressId });
+    await user.save();
+
+    res.json({ success: true, data: user.addresses });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getAll, getById, update, delete: delete_, addAddress, deleteAddress };
+

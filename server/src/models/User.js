@@ -55,6 +55,11 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    image: {
+      type: String,
+      default: "",
+    },
+
     isActive: {
       type: Boolean,
       default: true,

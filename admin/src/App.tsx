@@ -9,6 +9,8 @@ import CategoryForm from "./pages/CategoryForm";
 import Products from "./pages/Products";
 import ProductForm from "./pages/ProductForm";
 import Users from "./pages/Users";
+import Orders from "./pages/Orders";
+import HeroVideos from "./pages/HeroVideos";
 
 export default function App() {
   return (
@@ -30,7 +32,9 @@ export default function App() {
             <Route path="products" element={<Products />} />
             <Route path="products/add" element={<ProductForm />} />
             <Route path="products/edit/:id" element={<ProductForm />} />
+            <Route path="hero-videos" element={<HeroVideos />} />
             <Route path="users" element={<Users />} />
+            <Route path="orders" element={<Orders />} />
           </Route>
         </Routes>
       </AuthProvider>
