@@ -9,6 +9,7 @@ router.get("/", productController.getAll);
 router.get("/export/csv", protect, adminOnly, productController.exportCSV);
 router.get("/slug/:slug", productController.getBySlug);
 router.get("/:id", productController.getById);
+router.post("/bulk-get", productController.getBulk);
 router.post("/:id/reviews", protect, productController.addReview);
 
 router.post(

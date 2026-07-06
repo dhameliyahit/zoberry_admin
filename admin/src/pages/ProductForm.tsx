@@ -220,7 +220,7 @@ export default function ProductForm() {
   const [newSpecKey, setNewSpecKey] = useState("");
   const [newSpecValue, setNewSpecValue] = useState("");
   const [newOptionName, setNewOptionName] = useState("");
-  const [newOptionValue, setNewOptionValue] = useState("");
+  const [newOptionValues, setNewOptionValues] = useState<Record<number, string>>({});
   const [newVideoUrl, setNewVideoUrl] = useState("");
   const [newVideoTitle, setNewVideoTitle] = useState("");
 
@@ -370,14 +370,15 @@ export default function ProductForm() {
   };
 
   const handleAddOptionValue = (optIndex: number) => {
-    if (newOptionValue.trim()) {
+    const val = newOptionValues[optIndex] || "";
+    if (val.trim()) {
       const updated = [...form.variantOptions];
       updated[optIndex] = {
         ...updated[optIndex],
-        values: [...updated[optIndex].values, newOptionValue.trim()],
+        values: [...updated[optIndex].values, val.trim()],
       };
       updateField("variantOptions", updated);
-      setNewOptionValue("");
+      setNewOptionValues((prev) => ({ ...prev, [optIndex]: "" }));
     }
   };
 
@@ -1087,15 +1088,15 @@ export default function ProductForm() {
                               <TextField
                                 size="small"
                                 placeholder="Add value"
-                                value={newOptionValue}
-                                onChange={(e) => setNewOptionValue(e.target.value)}
+                                value={newOptionValues[optIndex] || ""}
+                                onChange={(e) => setNewOptionValues((prev) => ({ ...prev, [optIndex]: e.target.value }))}
                                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddOptionValue(optIndex); } }}
                                 sx={{ flex: 1, ...inputSx }}
                               />
                               <Button
                                 size="small"
                                 onClick={() => handleAddOptionValue(optIndex)}
-                                disabled={!newOptionValue.trim()}
+                                disabled={!(newOptionValues[optIndex] || "").trim()}
                                 sx={{ textTransform: "none", minWidth: 40, px: 1 }}
                               >
                                 <AddIcon sx={{ fontSize: 16 }} />

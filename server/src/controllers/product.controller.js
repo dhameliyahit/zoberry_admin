@@ -174,7 +174,24 @@ const getAll = async (req, res, next) => {
 
     const filter = {};
 
-    if (category) filter.category = category;
+    if (category) {
+      if (/^[0-9a-fA-F]{24}$/.test(category)) {
+        filter.category = category;
+      } else {
+        const escapedCategory = category.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const foundCategory = await Category.findOne({
+          $or: [
+            { slug: category },
+            { name: { $regex: new RegExp(`^${escapedCategory}$`, "i") } }
+          ]
+        });
+        if (foundCategory) {
+          filter.category = foundCategory._id;
+        } else {
+          filter.category = "000000000000000000000000";
+        }
+      }
+    }
     if (isFeatured !== undefined) filter.isFeatured = isFeatured === "true";
     if (status) filter.status = status;
     if (brand) filter.brand = { $regex: brand, $options: "i" };
@@ -319,6 +336,23 @@ const getById = async (req, res, next) => {
     }));
 
     res.json({ success: true, data: productObj });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getBulk = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ success: false, error: "Product IDs must be an array" });
+    }
+    const validIds = ids.filter(id => /^[0-9a-fA-F]{24}$/.test(id));
+    const products = await Product.find({ _id: { $in: validIds } }).populate(
+      "category",
+      "name slug"
+    );
+    res.json({ success: true, data: products });
   } catch (error) {
     next(error);
   }
@@ -567,6 +601,7 @@ module.exports = {
   getAll,
   getBySlug,
   getById,
+  getBulk,
   create,
   update,
   delete: delete_,

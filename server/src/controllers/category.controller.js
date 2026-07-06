@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const Product = require("../models/Product");
 const { uploadSingle } = require("../helpers/imageUpload");
 
 const getAll = async (req, res, next) => {
@@ -9,7 +10,19 @@ const getAll = async (req, res, next) => {
 
     const categories = await Category.find(filter).sort({ name: 1 });
 
-    res.json({ success: true, data: categories });
+    const categoriesWithCount = await Promise.all(
+      categories.map(async (cat) => {
+        const count = await Product.countDocuments({ category: cat._id });
+        const obj = cat.toObject ? cat.toObject() : cat;
+        return {
+          ...obj,
+          count: count,
+          products: count
+        };
+      })
+    );
+
+    res.json({ success: true, data: categoriesWithCount });
   } catch (error) {
     next(error);
   }
