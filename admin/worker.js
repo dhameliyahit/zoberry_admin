@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://130.162.190.70:5000';
+const BACKEND_URL = 'http://api.zoberryenterprise.info';
 
 export default {
   async fetch(request, env) {
