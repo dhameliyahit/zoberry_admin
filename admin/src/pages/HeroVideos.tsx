@@ -110,7 +110,7 @@ export default function HeroVideos() {
       setEditingVideo(video);
       setTitle(video.title);
       setUrl(video.url);
-      setProductId(typeof video.product === "object" ? video.product._id : video.product);
+      setProductId(typeof video.product === "object" && video.product !== null ? video.product._id : (video.product as string) || "");
       setIsActive(video.isActive);
       setOrder(video.order);
     } else {
@@ -236,7 +236,9 @@ export default function HeroVideos() {
                     {video.url}
                   </TableCell>
                   <TableCell>
-                    {typeof video.product === "object" ? video.product.title : "Unknown Product"}
+                    {typeof video.product === "object" && video.product !== null
+                      ? video.product.title
+                      : (products.find((p) => p._id === video.product)?.title || "Unknown Product")}
                   </TableCell>
                   <TableCell>
                     <Box

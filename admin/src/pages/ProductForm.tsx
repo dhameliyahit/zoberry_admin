@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import {
   Box,
   Typography,
@@ -23,6 +24,7 @@ import {
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
+  ArrowForward as ArrowForwardIcon,
   Delete as DeleteIcon,
   CloudUpload as UploadIcon,
   Add as AddIcon,
@@ -335,6 +337,104 @@ export default function ProductForm() {
     );
   };
 
+  const moveImageUp = (index: number) => {
+    if (index === 0) return;
+    setImages((prev) => {
+      const updated = [...prev];
+      const temp = updated[index];
+      updated[index] = updated[index - 1];
+      updated[index - 1] = temp;
+      
+      // Keep featured flag at index 0
+      updated.forEach((img, i) => {
+        img.isFeatured = (i === 0);
+      });
+      return updated;
+    });
+  };
+
+  const moveImageDown = (index: number) => {
+    setImages((prev) => {
+      if (index === prev.length - 1) return prev;
+      const updated = [...prev];
+      const temp = updated[index];
+      updated[index] = updated[index + 1];
+      updated[index + 1] = temp;
+      
+      // Keep featured flag at index 0
+      updated.forEach((img, i) => {
+        img.isFeatured = (i === 0);
+      });
+      return updated;
+    });
+  };
+
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAIGenerate = async () => {
+    if (!form.title.trim()) {
+      alert("Please enter a product title first so the AI knows what to write about.");
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      
+      const promptText = `Generate a high-quality e-commerce product details JSON object for a product named "${form.title}". 
+Make sure to research or use accurate information for this product.
+The output MUST be a JSON object with the following fields:
+{
+  "description": "A detailed, engaging, SEO-optimized product description including key features and benefits.",
+  "seoMetaTitle": "An SEO-friendly meta title under 60 characters.",
+  "seoMetaDescription": "A compelling meta description under 160 characters.",
+  "tags": ["tag1", "tag2", "tag3", "tag4"]
+}
+Do not include any other text, markdown formatting, or explanations. Only return the raw JSON object.`;
+
+      const response = await axios.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert e-commerce SEO copywriter and product expert. You generate accurate, high-quality, professional product descriptions and SEO metadata. Always return JSON."
+            },
+            {
+              role: "user",
+              content: promptText
+            }
+          ],
+          response_format: { type: "json_object" }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      const resultText = response.data.choices[0].message.content;
+      const data = JSON.parse(resultText);
+
+      setForm((prev) => ({
+        ...prev,
+        description: data.description || prev.description,
+        seoMetaTitle: data.seoMetaTitle || prev.seoMetaTitle,
+        seoMetaDescription: data.seoMetaDescription || prev.seoMetaDescription,
+        tags: Array.isArray(data.tags) ? data.tags : prev.tags
+      }));
+      
+      alert("Product details, tags, and SEO metadata generated successfully with AI!");
+    } catch (err: any) {
+      console.error("AI Generation failed", err);
+      alert("Failed to generate details with AI. Error: " + (err.response?.data?.error?.message || err.message));
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const handleAddTag = () => {
     const tag = tagInput.trim();
     if (tag && !form.tags.includes(tag)) {
@@ -570,7 +670,36 @@ export default function ProductForm() {
               <TabPanel value={tabValue} index={0}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
                   <Box>
-                    <Typography variant="caption" sx={labelSx}>Product Title *</Typography>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography variant="caption" sx={labelSx}>Product Title *</Typography>
+                      <Button
+                        variant="text"
+                        size="small"
+                        disabled={aiLoading || !form.title.trim()}
+                        onClick={handleAIGenerate}
+                        sx={{
+                          textTransform: "none",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          color: theme.palette.primary.main,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          p: 0,
+                          minWidth: 0,
+                          "&:hover": { textDecoration: "underline", background: "none" }
+                        }}
+                      >
+                        {aiLoading ? (
+                          <>
+                            <CircularProgress size={12} color="inherit" sx={{ mr: 0.5 }} />
+                            Generating...
+                          </>
+                        ) : (
+                          "✨ Generate with AI"
+                        )}
+                      </Button>
+                    </Box>
                     <TextField
                       fullWidth
                       placeholder="e.g. Wireless Bluetooth Headphones"
@@ -847,6 +976,51 @@ export default function ProductForm() {
                           >
                             <DeleteIcon sx={{ fontSize: 14 }} />
                           </IconButton>
+                          
+                          {/* Reordering Controls and Sequence Badge */}
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: 28,
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              bgcolor: "rgba(0, 0, 0, 0.6)",
+                              px: 0.5,
+                              zIndex: 10,
+                            }}
+                          >
+                            <IconButton
+                              size="small"
+                              disabled={index === 0}
+                              onClick={() => moveImageUp(index)}
+                              sx={{
+                                color: "#fff",
+                                p: 0.25,
+                                "&.Mui-disabled": { color: "rgba(255,255,255,0.3)" },
+                              }}
+                            >
+                              <ArrowBackIcon sx={{ fontSize: 14 }} />
+                            </IconButton>
+                            <Typography sx={{ color: "#fff", fontSize: "0.65rem", fontWeight: 700 }}>
+                              #{index + 1}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              disabled={index === images.length - 1}
+                              onClick={() => moveImageDown(index)}
+                              sx={{
+                                color: "#fff",
+                                p: 0.25,
+                                "&.Mui-disabled": { color: "rgba(255,255,255,0.3)" },
+                              }}
+                            >
+                              <ArrowForwardIcon sx={{ fontSize: 14 }} />
+                            </IconButton>
+                          </Box>
                         </Box>
                       ))}
                     </Box>
@@ -1285,55 +1459,102 @@ export default function ProductForm() {
 
             {/* Actions */}
             <Divider />
-            <Box sx={{ p: 3, display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
-              <Button
-                onClick={() => navigate("/products")}
-                disabled={loading}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  color: theme.palette.text.secondary,
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: "8px",
-                  px: 3,
-                  py: 1,
-                  "&:hover": {
-                    background: isDark ? alpha("#ffffff", 0.05) : alpha("#000000", 0.04),
-                    borderColor: theme.palette.text.secondary,
-                  },
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={loading || !form.title.trim() || !form.category}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  background: theme.palette.text.primary,
-                  color: theme.palette.background.paper,
-                  borderRadius: "8px",
-                  px: 3,
-                  py: 1,
-                  boxShadow: "none",
-                  "&:hover": { background: theme.palette.text.primary, boxShadow: "none", opacity: 0.9 },
-                  "&.Mui-disabled": {
-                    background: theme.palette.action.disabledBackground,
-                    color: theme.palette.action.disabled,
-                  },
-                }}
-              >
-                {loading ? (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CircularProgress size={16} sx={{ color: "inherit" }} />
-                    Saving...
-                  </Box>
-                ) : isEdit ? "Update Product" : "Create Product"}
-              </Button>
+            <Box sx={{ p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box>
+                {tabValue > 0 && (
+                  <Button
+                    type="button"
+                    onClick={() => setTabValue((prev) => prev - 1)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      fontSize: "0.875rem",
+                      color: theme.palette.text.primary,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: "8px",
+                      px: 3,
+                      py: 1,
+                      "&:hover": {
+                        background: isDark ? alpha("#ffffff", 0.05) : alpha("#000000", 0.04),
+                        borderColor: theme.palette.text.primary,
+                      },
+                    }}
+                  >
+                    Back
+                  </Button>
+                )}
+              </Box>
+              <Box sx={{ display: "flex", gap: 1.5 }}>
+                <Button
+                  onClick={() => navigate("/products")}
+                  disabled={loading}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    color: theme.palette.text.secondary,
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: "8px",
+                    px: 3,
+                    py: 1,
+                    "&:hover": {
+                      background: isDark ? alpha("#ffffff", 0.05) : alpha("#000000", 0.04),
+                      borderColor: theme.palette.text.secondary,
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+                {tabValue < 8 && (
+                  <Button
+                    type="button"
+                    onClick={() => setTabValue((prev) => prev + 1)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      fontSize: "0.875rem",
+                      background: isDark ? alpha("#ffffff", 0.08) : alpha("#000000", 0.05),
+                      color: theme.palette.text.primary,
+                      borderRadius: "8px",
+                      px: 3,
+                      py: 1,
+                      "&:hover": {
+                        background: isDark ? alpha("#ffffff", 0.12) : alpha("#000000", 0.08),
+                      },
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading || !form.title.trim() || !form.category}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    background: theme.palette.text.primary,
+                    color: theme.palette.background.paper,
+                    borderRadius: "8px",
+                    px: 3,
+                    py: 1,
+                    boxShadow: "none",
+                    "&:hover": { background: theme.palette.text.primary, boxShadow: "none", opacity: 0.9 },
+                    "&.Mui-disabled": {
+                      background: theme.palette.action.disabledBackground,
+                      color: theme.palette.action.disabled,
+                    },
+                  }}
+                >
+                  {loading ? (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CircularProgress size={16} sx={{ color: "inherit" }} />
+                      Saving...
+                    </Box>
+                  ) : isEdit ? "Update Product" : "Create Product"}
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Paper>
