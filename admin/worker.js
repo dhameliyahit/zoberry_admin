@@ -33,6 +33,9 @@ export default {
       const response = await fetch(proxyRequest);
 
       const newResponse = new Response(response.body, response);
+      newResponse.headers.delete('Access-Control-Allow-Origin');
+      newResponse.headers.delete('Access-Control-Allow-Methods');
+      newResponse.headers.delete('Access-Control-Allow-Headers');
       newResponse.headers.set('Access-Control-Allow-Origin', '*');
       newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
       newResponse.headers.set('Access-Control-Allow-Headers', '*');
