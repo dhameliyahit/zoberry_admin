@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zoberry-admin",
   "compatibility_date": "2026-07-06",
-  "pages_build_output_dir": "./dist",
+  "main": "worker.js",
   "assets": {
     "directory": "./dist"
   },
