@@ -8,10 +8,11 @@
   --card-bg: #ffffff;
   --hover-bg: #f5f5f5;
 
-  --color-primary: #000000;
-  --color-primary-hover: #333333;
-  --color-primary-light: #f5f5f5;
-  --color-primary-border: #cccccc;
+  /* Premium Royal Navy Accent System */
+  --color-primary: #293681;
+  --color-primary-hover: #1e2860;
+  --color-primary-light: #f0f2fa;
+  --color-primary-border: #d4daf2;
 
   --color-destructive: #dc2626;
   --color-destructive-hover: #b91c1c;
@@ -43,10 +44,11 @@
   --card-bg: #111111;
   --hover-bg: #1a1a1a;
 
-  --color-primary: #ffffff;
-  --color-primary-hover: #cccccc;
-  --color-primary-light: #1a1a1a;
-  --color-primary-border: #333333;
+  /* Dark mode balancing for the Royal Navy Accent */
+  --color-primary: #4c5cb5;
+  --color-primary-hover: #6375cf;
+  --color-primary-light: #0d122b;
+  --color-primary-border: #1a2354;
 
   --color-destructive: #ef4444;
   --color-destructive-hover: #f87171;
@@ -60,42 +62,4 @@
   --color-warning: #f59e0b;
   --color-warning-light: #1a1200;
   --color-warning-border: #451a03;
-}
-
-@theme {
-  --color-bg-primary: var(--bg-primary);
-  --color-bg-secondary: var(--bg-secondary);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  --color-border: var(--border-color);
-  --color-card-bg: var(--card-bg);
-  --color-hover-bg: var(--hover-bg);
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-light: var(--color-primary-light);
-  --color-primary-border: var(--color-primary-border);
-  --color-destructive: var(--color-destructive);
-  --color-destructive-hover: var(--color-destructive-hover);
-  --color-destructive-light: var(--color-destructive-light);
-  --color-destructive-border: var(--color-destructive-border);
-  --color-success: var(--color-success);
-  --color-success-light: var(--color-success-light);
-  --color-success-border: var(--color-success-border);
-  --color-warning: var(--color-warning);
-  --color-warning-light: var(--color-warning-light);
-  --color-warning-border: var(--color-warning-border);
-  --font-sans: var(--font-sans);
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-}
-
-* {
-  box-sizing: border-box;
 }

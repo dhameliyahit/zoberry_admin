@@ -517,21 +517,19 @@ Do not include any other text, markdown formatting, or explanations. Only return
       formData.append("trackQuantity", String(form.trackQuantity));
       formData.append("continueSelling", String(form.continueSelling));
 
-      if (form.tags.length > 0) {
-        formData.append("tags", JSON.stringify(form.tags));
-      }
+      formData.append("tags", JSON.stringify(form.tags));
 
       if (form.seoMetaTitle || form.seoMetaDescription) {
         formData.append("seo", JSON.stringify({ metaTitle: form.seoMetaTitle, metaDescription: form.seoMetaDescription }));
       }
 
-      if (form.specifications.length > 0) {
-        formData.append("specifications", JSON.stringify(form.specifications));
-      }
+      formData.append("specifications", JSON.stringify(form.specifications));
 
-      if (form.videos.length > 0) {
-        formData.append("videos", JSON.stringify(form.videos));
+      const finalVideos = [...form.videos];
+      if (newVideoUrl.trim()) {
+        finalVideos.push({ url: newVideoUrl.trim(), title: newVideoTitle.trim() });
       }
+      formData.append("videos", JSON.stringify(finalVideos));
 
       if (form.weight) formData.append("weight", String(form.weight));
       if (form.width) formData.append("width", String(form.width));

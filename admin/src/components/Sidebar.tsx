@@ -16,6 +16,7 @@ import {
   Inventory as InventoryIcon,
   People as PeopleIcon,
   Receipt as ReceiptIcon,
+  Payments as PaymentsIcon,
   ChevronRight,
   OndemandVideo as VideoIcon,
 } from "@mui/icons-material";
@@ -31,6 +32,7 @@ const menuItems = [
   { text: "Hero Videos", icon: <VideoIcon />, path: "/hero-videos" },
   { text: "Users", icon: <PeopleIcon />, path: "/users" },
   { text: "Orders", icon: <ReceiptIcon />, path: "/orders" },
+  { text: "Payment Settings", icon: <PaymentsIcon />, path: "/payment-settings" },
 ];
 
 interface SidebarProps {
