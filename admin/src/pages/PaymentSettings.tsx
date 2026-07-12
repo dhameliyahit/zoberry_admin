@@ -22,8 +22,8 @@ import SaveIcon from "@mui/icons-material/Save";
 const ALL_METHODS = [
   { value: "cod", label: "Cash on Delivery" },
   { value: "uropay", label: "UPI (UroPay)" },
+  { value: "directupi", label: "UPI (Scan & Pay)" },
   { value: "netbanking", label: "Netbanking" },
-  { value: "wallet", label: "Wallet / PayPal" },
   { value: "card", label: "Card" },
 ];
 
@@ -35,7 +35,7 @@ export default function PaymentSettings() {
 
   const [enabledMethods, setEnabledMethods] = useState<string[]>(["cod", "uropay"]);
   const [defaultMethod, setDefaultMethod] = useState("cod");
-  const [uropay, setUroPay] = useState({
+  const [uroPay, setUroPay] = useState({
     enabled: true,
     mode: "test",
     apiKey: "",
@@ -51,7 +51,7 @@ export default function PaymentSettings() {
         const v = res.data?.data || {};
         if (Array.isArray(v.enabledMethods)) setEnabledMethods(v.enabledMethods);
         if (v.defaultMethod) setDefaultMethod(v.defaultMethod);
-        if (v.providers?.uropay) setUroPay({ ...uropay, ...v.providers.uropay });
+        if (v.providers?.uropay) setUroPay({ ...uroPay, ...v.providers.uropay });
       })
       .catch((err) => setError(err?.response?.data?.error || "Failed to load config"))
       .finally(() => setLoading(false));

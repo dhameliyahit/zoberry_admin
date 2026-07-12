@@ -24,6 +24,7 @@ router.post(
 );
 
 router.put("/:id", protect, adminOnly, orderController.update);
+router.post("/:id/verify-utr", protect, adminOnly, orderController.verifyUtr);
 router.delete("/:id", protect, adminOnly, orderController.delete);
 
 module.exports = router;

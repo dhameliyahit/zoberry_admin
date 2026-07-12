@@ -2,11 +2,12 @@ const Order = require("../models/Order");
 
 const getAll = async (req, res, next) => {
   try {
-    const { status, paymentStatus, page = 1, limit = 20 } = req.query;
+    const { status, paymentStatus, utrStatus, page = 1, limit = 20 } = req.query;
     const filter = {};
 
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
+    if (utrStatus) filter.utrStatus = utrStatus;
 
     const skip = (Number(page) - 1) * Number(limit);
 
@@ -215,6 +216,42 @@ const delete_ = async (req, res, next) => {
   }
 };
 
+// Manual verification of a Direct UPI payment: merchant confirms the credit
+// in their bank, then approves (or rejects) the buyer-submitted UTR.
+const verifyUtr = async (req, res, next) => {
+  try {
+    const { action, utr } = req.body;
+    if (!["verify", "reject"].includes(action)) {
+      return res.status(400).json({ success: false, error: "Invalid action" });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+    if (order.paymentMethod !== "directupi") {
+      return res
+        .status(400)
+        .json({ success: false, error: "Order is not a Direct UPI order" });
+    }
+
+    if (action === "verify") {
+      order.utr = (utr || order.utr || "").toString().trim();
+      order.utrStatus = "verified";
+      order.paymentStatus = "paid";
+      if (order.status === "pending") order.status = "confirmed";
+    } else {
+      order.utrStatus = "rejected";
+      order.paymentStatus = "failed";
+    }
+
+    const updated = await order.save();
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getMetrics = async (req, res, next) => {
   try {
     const [
@@ -255,6 +292,7 @@ module.exports = {
   create,
   update,
   cancelMyOrder,
+  verifyUtr,
   getMetrics,
   delete: delete_,
 };

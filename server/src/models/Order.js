@@ -79,8 +79,20 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["cod", "card", "upi", "netbanking", "wallet"],
+      enum: ["cod", "card", "upi", "netbanking", "wallet", "uropay", "directupi"],
       default: "cod",
+    },
+
+    // UroPay (UPI gateway) linkage
+    uroPayOrderId: { type: String },
+
+    // Static Direct UPI linkage (QR scanned to merchant VPA)
+    upiVpa: { type: String, default: "" },
+    utr: { type: String, default: "" },
+    utrStatus: {
+      type: String,
+      enum: ["", "submitted", "verified", "rejected"],
+      default: "",
     },
 
     // Admin or customer notes

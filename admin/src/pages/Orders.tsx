@@ -73,6 +73,9 @@ interface Order {
   paymentMethod: string;
   notes: string;
   createdAt: string;
+  upiVpa?: string;
+  utr?: string;
+  utrStatus?: "" | "submitted" | "verified" | "rejected";
 }
 
 export default function Orders() {
@@ -80,9 +83,11 @@ export default function Orders() {
   const isDark = theme.palette.mode === "dark";
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pendingUtr, setPendingUtr] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [verifyingId, setVerifyingId] = useState("");
 
   // Detailed modal states
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -103,8 +108,38 @@ export default function Orders() {
     }
   };
 
+  const fetchPendingUtr = async () => {
+    try {
+      const res = await api.get("/orders?utrStatus=submitted");
+      if (res.data && res.data.data) {
+        setPendingUtr(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch pending UTR orders", err);
+    }
+  };
+
+  const handleVerifyUtr = async (orderId: string, action: "verify" | "reject") => {
+    try {
+      setVerifyingId(orderId);
+      const res = await api.post(`/orders/${orderId}/verify-utr`, { action });
+      if (res.data && res.data.data) {
+        const updated = res.data.data;
+        setPendingUtr((prev) => prev.filter((o) => o._id !== orderId));
+        setOrders((prev) =>
+          prev.map((o) => (o._id === orderId ? { ...o, ...updated } : o))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to verify UTR", err);
+    } finally {
+      setVerifyingId("");
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchPendingUtr();
   }, []);
 
   const handleOpenDetails = (order: Order) => {
@@ -310,6 +345,86 @@ export default function Orders() {
           </FormControl>
         </Box>
       </Box>
+
+      {/* Pending Direct UPI verification */}
+      {pendingUtr.length > 0 && (
+        <Paper
+          sx={{
+            p: 2.5,
+            mb: 3,
+            borderRadius: "12px",
+            border: "1px solid",
+            borderColor: "warning.main",
+            background: "var(--bg-paper)",
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+            Pending UPI Verification ({pendingUtr.length})
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {pendingUtr.map((o) => (
+              <Box
+                key={o._id}
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 2,
+                  p: 1.5,
+                  borderRadius: "8px",
+                  background: "var(--bg-secondary)",
+                }}
+              >
+                <Box sx={{ minWidth: 160 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {o.orderNumber || o._id.slice(-8).toUpperCase()}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {o.customer?.name || "N/A"} · ₹{o.total}
+                  </Typography>
+                </Box>
+                <Box sx={{ minWidth: 180 }}>
+                  <Typography variant="caption" color="textSecondary" sx={{ display: "block" }}>
+                    UTR
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, letterSpacing: 0.5 }}>
+                    {o.utr || "—"}
+                  </Typography>
+                </Box>
+                <Box sx={{ minWidth: 150 }}>
+                  <Typography variant="caption" color="textSecondary" sx={{ display: "block" }}>
+                    Paid To (VPA)
+                  </Typography>
+                  <Typography variant="body2">{o.upiVpa || "—"}</Typography>
+                </Box>
+                <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    disabled={verifyingId === o._id}
+                    onClick={() => handleVerifyUtr(o._id, "verify")}
+                  >
+                    Verify &amp; Confirm
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    disabled={verifyingId === o._id}
+                    onClick={() => handleVerifyUtr(o._id, "reject")}
+                  >
+                    Reject
+                  </Button>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+          <Typography variant="caption" color="textSecondary" sx={{ display: "block", mt: 1.5 }}>
+            Confirm the credit in your bank/UPI app, then Verify to mark the order Paid.
+          </Typography>
+        </Paper>
+      )}
 
       {/* Grid Table */}
       <Paper

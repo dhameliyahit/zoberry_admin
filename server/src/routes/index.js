@@ -15,5 +15,6 @@ router.use("/contact", require("./contact.routes"));
 router.use("/hero-slides", require("./heroSlide.routes"));
 router.use("/hero-videos", require("./heroVideo.routes"));
 router.use("/recently-viewed", require("./recentlyViewed.routes"));
+router.use("/config", require("./config.routes"));
 
 module.exports = router;

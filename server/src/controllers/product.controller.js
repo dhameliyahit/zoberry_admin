@@ -107,11 +107,11 @@ const buildProductData = (body, files) => {
     if (typeof parsed === "object") data.seo = { ...data.seo, ...parsed };
   }
 
-  if (body.specifications) {
+  if (body.specifications !== undefined) {
     data.specifications = parseJSON(body.specifications);
   }
 
-  if (body.tags) {
+  if (body.tags !== undefined) {
     const parsed = parseJSON(body.tags);
     data.tags = Array.isArray(parsed) ? parsed : [parsed];
   }
@@ -147,7 +147,7 @@ const buildProductData = (body, files) => {
   data.images = images;
 
   // ── Videos ──
-  if (body.videos) {
+  if (body.videos !== undefined) {
     const parsed = parseJSON(body.videos);
     data.videos = Array.isArray(parsed) ? parsed : [];
   }
