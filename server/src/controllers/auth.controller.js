@@ -109,9 +109,6 @@ const getMe = async (req, res, next) => {
 const googleLogin = async (req, res, next) => {
   try {
     const { token } = req.body;
-    if (!token) {
-      return res.status(400).json({ success: false, error: "Google token is required" });
-    }
 
     // Verify token with Google API
     const response = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
