@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const Category = require("../models/Category");
 const Review = require("../models/Review");
 const { uploadMultiple } = require("../helpers/imageUpload");
+const revalidate = require("../helpers/revalidate");
 
 const parseJSON = (val) => {
   if (typeof val === "string") {
@@ -383,6 +384,8 @@ const create = async (req, res, next) => {
 
     const product = await Product.create(data);
 
+    revalidate(["products"]);
+
     res.status(201).json({ success: true, data: product });
   } catch (error) {
     next(error);
@@ -422,6 +425,8 @@ const update = async (req, res, next) => {
       runValidators: true,
     }).populate("category", "name slug");
 
+    revalidate(["products"]);
+
     res.json({ success: true, data: updated });
   } catch (error) {
     next(error);
@@ -436,6 +441,7 @@ const delete_ = async (req, res, next) => {
         .status(404)
         .json({ success: false, error: "Product not found" });
     }
+    revalidate(["products"]);
     res.json({ success: true, message: "Product deleted" });
   } catch (error) {
     next(error);
@@ -450,8 +456,9 @@ const bulkUpdate = async (req, res, next) => {
       return res.status(400).json({ success: false, error: "Product IDs are required" });
     }
 
-    if (action === "delete") {
+      if (action === "delete") {
       await Product.deleteMany({ _id: { $in: ids } });
+      revalidate(["products"]);
       return res.json({ success: true, message: `${ids.length} products deleted` });
     }
 
@@ -464,6 +471,7 @@ const bulkUpdate = async (req, res, next) => {
       if (data.stock !== undefined) updateData.stock = Number(data.stock);
 
       await Product.updateMany({ _id: { $in: ids } }, { $set: updateData });
+      revalidate(["products"]);
       return res.json({ success: true, message: `${ids.length} products updated` });
     }
 
@@ -490,6 +498,7 @@ const duplicate = async (req, res, next) => {
     sourceObj.title = `${sourceObj.title} (Copy)`;
 
     const duplicate = await Product.create(sourceObj);
+    revalidate(["products"]);
     res.status(201).json({ success: true, data: duplicate });
   } catch (error) {
     next(error);
