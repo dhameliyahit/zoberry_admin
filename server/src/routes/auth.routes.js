@@ -33,7 +33,11 @@ router.post(
   login
 );
 
-router.post("/google-login", googleLogin);
+router.post(
+  "/google-login",
+  [body("token").notEmpty().withMessage("Google token is required"), validate],
+  googleLogin
+);
 
 router.post(
   "/admin-login",

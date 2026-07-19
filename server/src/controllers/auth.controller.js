@@ -33,6 +33,9 @@ const register = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, error: "Email already registered" });
+    }
     next(error);
   }
 };
@@ -109,16 +112,17 @@ const getMe = async (req, res, next) => {
 const googleLogin = async (req, res, next) => {
   try {
     const { token } = req.body;
-    if (!token) {
-      return res.status(400).json({ success: false, error: "Google token is required" });
-    }
 
     // Verify token with Google API
     const response = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
     const payload = response.data;
 
-    // payload contains: email, name, picture, sub (googleId)
-    const { email, name, picture } = payload;
+    // payload contains: email, name, picture, sub (googleId), email_verified
+    const { email, name, picture, email_verified } = payload;
+
+    if (!email || (email_verified !== "true" && email_verified !== true)) {
+      return res.status(401).json({ success: false, error: "Google account email is not verified" });
+    }
 
     let user = await User.findOne({ email });
 

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const { login } = useAuth();
@@ -9,18 +10,40 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState<{email?: string; password?: string}>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const validateForm = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (!password) {
+      newErrors.password = "Password is required";
+    }
+    setValidationErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!validateForm()) return;
+
     setLoading(true);
     try {
       await login(email, password);
       navigate("/");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: err.response?.data?.error || err.response?.data?.message || "Invalid email or password"
+      });
+      setError(err.response?.data?.error || err.response?.data?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -62,11 +85,15 @@ export default function Login() {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-400 bg-slate-50/50"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (validationErrors.email) setValidationErrors({ ...validationErrors, email: undefined });
+              }}
+              className={`w-full px-3.5 py-2 text-sm border rounded-lg outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-400 bg-slate-50/50 ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
               placeholder="Enter Email"
               required
             />
+            {validationErrors.email && <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>}
           </div>
 
           <div>
@@ -77,8 +104,11 @@ export default function Login() {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-3.5 pr-10 py-2 text-sm border border-slate-200 rounded-lg outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-400 bg-slate-50/50"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (validationErrors.password) setValidationErrors({ ...validationErrors, password: undefined });
+                }}
+                className={`w-full pl-3.5 pr-10 py-2 text-sm border rounded-lg outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-400 bg-slate-50/50 ${validationErrors.password ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-blue-500'}`}
                 placeholder="••••••••"
                 required
               />
@@ -90,6 +120,7 @@ export default function Login() {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {validationErrors.password && <p className="text-red-500 text-xs mt-1">{validationErrors.password}</p>}
           </div>
 
           <div className="pt-2">
@@ -117,3 +148,4 @@ export default function Login() {
     </div>
   );
 }
+

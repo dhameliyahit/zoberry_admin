@@ -1,6 +1,7 @@
 const Category = require("../models/Category");
 const Product = require("../models/Product");
 const { uploadSingle } = require("../helpers/imageUpload");
+const revalidate = require("../helpers/revalidate");
 
 const getAll = async (req, res, next) => {
   try {
@@ -54,6 +55,8 @@ const create = async (req, res, next) => {
 
     const category = await Category.create({ ...req.body, image });
 
+    revalidate(["categories", "products"]);
+
     res.status(201).json({ success: true, data: category });
   } catch (error) {
     next(error);
@@ -82,6 +85,8 @@ const update = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
+    revalidate(["categories", "products"]);
+
     res.json({ success: true, data: updated });
   } catch (error) {
     next(error);
@@ -96,6 +101,7 @@ const delete_ = async (req, res, next) => {
         .status(404)
         .json({ success: false, error: "Category not found" });
     }
+    revalidate(["categories", "products"]);
     res.json({ success: true, message: "Category deleted" });
   } catch (error) {
     next(error);
